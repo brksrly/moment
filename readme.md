@@ -1,3 +1,14 @@
+Modified by Solium Capital (Brooks Riley)
+
+(Added Javascript unit tests prefixed with SUM_ for new features)
+// - If month is unrecognized -> Invalid Date (vs. Default to Jan)
+// - Match only first three characters (fr: "jan" => "janv.")
+// - Non Ascii characters match all (fr: "fevr"=> "févr.")
+// - Fixed bug with Overflowing Dates not being invalid when specifing Array of date Formats 
+
+If you need to modify this you can edit the uniminified moment.js and run `make moment` to generate the minified version. 
+Any modifications should pass the unit tests which can be run with make test-moment.
+
 [Moment.js](http://momentjs.com)
 ================================
 

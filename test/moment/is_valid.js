@@ -55,6 +55,18 @@ exports.is_valid = {
         test.equal(moment('fail').isValid(), false, 'string "fail"');
         test.done();
     },
+    "SUM_valid month name" : function (test) {
+        test.expect(1);
+
+        test.equal(moment('01-Jan-2012','DD-MMM-YYYY').isValid(), true, '01-Jan-2012 should be valid');
+        test.done();
+    },
+    "SUM_invalid month name" : function (test) {
+        test.expect(1);
+
+        test.equal(moment('01-fail-2012','DD-MMM-YYYY').isValid(), false, '01-fail-2012 should be invalid');
+        test.done();
+    },
 
     "invalid string iso 8601" : function (test) {
 

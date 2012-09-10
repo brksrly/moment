@@ -3,6 +3,13 @@
 // author : Tim Wood
 // license : MIT
 // momentjs.com
+// Modified by Solium Capital
+
+// See Tests prefixed with SUM_
+// - If month is unrecognized -> Invalid Date (vs. Default to Jan)
+// - Match only first three characters (fr: "jan" => "janv.")
+// - Non Ascii characters match all (fr: "fevr"=> "févr.")
+// - Fixed bug with Overflowing Dates not being invalid when specifing Array of date Formats 
 
 (function (Date, undefined) {
 
@@ -141,7 +148,6 @@
         this._d = date;
         this._isUTC = !!isUTC;
         this._a = date._a || null;
-        date._a = null;
         this._lang = lang || false;
     }
 
@@ -291,7 +297,7 @@
     // are provided, it will load the language file module.  As a convenience,
     // this function also returns the language values.
     function loadLang(key, values) {
-        var i, m,
+        var i, m, m3
             parse = [];
 
         if (!values && hasModule) {
@@ -307,8 +313,14 @@
 
         for (i = 0; i < 12; i++) {
             m = moment([2000, i]);
-            parse[i] = new RegExp('^' + (values.months[i] || values.months(m, '')) + 
-                '|^' + (values.monthsShort[i] || values.monthsShort(m, '')).replace('.', ''), 'i');
+	    if(values.monthsShort[i]){	    
+	      m3 = values.monthsShort[i].substring(0,3);
+	    }
+	    else{
+	      m3 = false;      
+	    }
+	    parse[i] = new RegExp('^' + (values.months[i] || values.months(m, '')) + 
+                '|^' + (m3 || values.monthsShort(m, '')).replace('.', '').replace(/[^A-Za-z]/,'.'), 'i');
         }
         values.monthsParse = values.monthsParse || parse;
 
@@ -443,8 +455,9 @@
     // function to convert string input to date
     function addTimeToArrayFromToken(token, input, datePartArray, config) {
         var a;
+	var success = true;
         //console.log('addTime', format, input);
-        switch (token) {
+	switch (token) {
         // MONTH
         case 'M' : // fall through to MM
         case 'MM' :
@@ -452,9 +465,11 @@
             break;
         case 'MMM' : // fall through to MMMM
         case 'MMMM' :
-            for (a = 0; a < 12; a++) {
+            success = false;          
+	    for (a = 0; a < 12; a++) {
                 if (getLangDefinition().monthsParse[a].test(input)) {
                     datePartArray[1] = a;
+                    success = true;			
                     break;
                 }
             }
@@ -522,6 +537,7 @@
             }
             break;
         }
+	return success;
     }
 
     // date from string and format string
@@ -536,8 +552,10 @@
 
         for (i = 0; i < tokens.length; i++) {
             parsedInput = (getParseRegexForToken(tokens[i]).exec(string) || [])[0];
-            string = string.replace(getParseRegexForToken(tokens[i]), '');
-            addTimeToArrayFromToken(tokens[i], parsedInput, datePartArray, config);
+	    string = string.replace(getParseRegexForToken(tokens[i]), '');
+	    if(!addTimeToArrayFromToken(tokens[i], parsedInput, datePartArray, config)){
+		return new Date(undefined);
+	    }
         }
         // handle am pm
         if (config.isPm && datePartArray[3] < 12) {

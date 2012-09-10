@@ -139,6 +139,52 @@ exports.create = {
         }
         test.done();
     },
+    
+    "SUM_string with format, only require first three characters of monthsShort" : function(test) {
+        moment.lang('SUM', {monthsShort : ['janv.','févr.','mars','avr.','mai', 'juin', 'juil.','août', 'sept.', 'oct.', 'nov.', 'déc.']});
+        
+	var e = '12-janv.-1999',
+	    a = [
+                ['DD-MMM-YYYY',  '12-jan-1999'],
+                ['DD-MMM-YYYY',  '12-janv-1999'],
+                ['DD-MMM-YYYY',  '12-janv.-1999'],
+            ],
+            i;
+        
+        test.expect(a.length);
+        for (i = 0; i < a.length; i++) {
+            test.equal(moment(a[i][1], a[i][0]).format(a[i][0]), e , e + ' vs ' + a[i][1]);
+        }
+        test.done();
+    },
+    
+    "SUM_string with format, loose on accented characters" : function(test) {
+        moment.lang('SUM', {monthsShort : ['janv.','févr.','mars','avr.','mai', 'juin', 'juil.','août', 'sept.', 'oct.', 'nov.', 'déc.']});
+        
+	var e1 = '12-févr.-1999',
+	    e2 = '12-août-1999',
+	    a1 = [
+                ['DD-MMM-YYYY',  '12-févr.-1999'],
+                ['DD-MMM-YYYY',  '12-FEVR.-1999'],
+                ['DD-MMM-YYYY',  '12-fevr.-1999'],
+            ],
+	    a2 = [
+                ['DD-MMM-YYYY',  '12-août-1999'],
+                ['DD-MMM-YYYY',  '12-aout-1999'],
+                ['DD-MMM-YYYY',  '12-AOUT-1999'],
+            ],
+            i,j;
+        
+        test.expect(a1.length+a2.length);
+        for (i = 0; i < a1.length; i++) {
+            test.equal(moment(a1[i][1], a1[i][0]).format(a1[i][0]), e1 , e1 + ' --> ' + a1[i][1]);
+        }
+        
+        for (j = 0; j < a2.length; j++) {
+            test.equal(moment(a2[j][1], a2[j][0]).format(a2[j][0]), e2 , e2 + ' --> ' + a2[j][1]);
+        }
+        test.done();
+    },    
 
     "string with format no separators" : function(test) {
         moment.lang('en');
@@ -153,7 +199,6 @@ exports.create = {
         for (i = 0; i < a.length; i++) {
             test.equal(moment(a[i][1], a[i][0]).format(a[i][0]), a[i][1], a[i][0] + ' ---> ' + a[i][1]);
         }
-        
         test.done();
     },
 
